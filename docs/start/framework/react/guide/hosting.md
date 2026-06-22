@@ -514,8 +514,6 @@ The CLI detects your TanStack Start project and adds an `aws-blocks/` directory 
 }
 ```
 
-This deploys your TanStack Start app to CloudFront (CDN) + S3 (static assets) + Lambda (SSR and API routes).
-
 #### Local development
 
 During local development, all Blocks run with in-memory implementations — no AWS account or credentials needed:
@@ -524,7 +522,7 @@ During local development, all Blocks run with in-memory implementations — no A
 npm run dev
 ```
 
-Your TanStack Start app runs at `http://localhost:3000` as usual.
+This starts both the frontend dev server with HMR and a local backend API server.
 
 #### Sandbox deployments
 
@@ -538,14 +536,18 @@ The sandbox uses Lambda hot-swapping for near-instant deploys, giving each devel
 
 #### Production deployment
 
+Bootstrap the AWS CDK (one-time per account/region):
+
+```bash
+npx cdk bootstrap aws://ACCOUNT_ID/REGION
+```
+
+Then deploy:
+
 ```bash
 npm run deploy
 ```
 
-This runs a full CDK deployment. To remove all resources:
-
-```bash
-npm run destroy
-```
+This deploys your TanStack Start app to CloudFront (CDN) + S3 (static assets) + Lambda (SSR and API routes).
 
 For more details, see the [AWS Blocks Developer Guide](https://docs.aws.amazon.com/blocks/latest/devguide/what-is-blocks.html).
