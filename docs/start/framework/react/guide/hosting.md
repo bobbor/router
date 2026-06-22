@@ -492,39 +492,27 @@ After successful deployment, click the **Visit site** button to see your deploye
 
 ```bash
 npm create @aws-blocks/blocks-app@latest .
-npm install
 ```
 
-The CLI detects your TanStack Start project and adds an `aws-blocks/` directory with deployment configuration and a `package.json` workspace.
-
-3. Add the deploy scripts to your `package.json`:
-
-```json
-{
-  "scripts": {
-    "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
-    "dev:server": "tsx watch aws-blocks/scripts/server.ts",
-    "dev:client": "vite dev",
-    "build": "vite build",
-    "deploy": "tsx aws-blocks/scripts/deploy.ts",
-    "destroy": "tsx aws-blocks/scripts/destroy.ts",
-    "sandbox": "tsx aws-blocks/scripts/sandbox.ts",
-    "sandbox:destroy": "tsx aws-blocks/scripts/sandbox-destroy.ts"
-  }
-}
-```
+The CLI detects your TanStack Start project, adds an `aws-blocks/` directory with backend configuration, and updates your `package.json` with workspace setup, dependencies, and deploy scripts.
 
 #### Local development
 
 During local development, all Blocks run with in-memory implementations — no AWS account or credentials needed:
 
 ```bash
-npm run dev
+npm run dev:server
 ```
 
-This starts both the frontend dev server with HMR and a local backend API server.
+This starts both the backend API server and the frontend dev server with HMR.
 
 #### Sandbox deployments
+
+Bootstrap the AWS CDK (one-time per account/region):
+
+```bash
+npx cdk bootstrap aws://ACCOUNT_ID/REGION
+```
 
 For rapid iteration against real AWS services without full CloudFormation deployments:
 
@@ -536,13 +524,7 @@ The sandbox uses Lambda hot-swapping for near-instant deploys, giving each devel
 
 #### Production deployment
 
-Bootstrap the AWS CDK (one-time per account/region):
-
-```bash
-npx cdk bootstrap aws://ACCOUNT_ID/REGION
-```
-
-Then deploy:
+If you already bootstrapped CDK for the sandbox, no additional setup is needed. Otherwise, run `npx cdk bootstrap aws://ACCOUNT_ID/REGION` first.
 
 ```bash
 npm run deploy
