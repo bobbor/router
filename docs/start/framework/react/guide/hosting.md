@@ -514,18 +514,6 @@ The CLI detects your TanStack Start project and adds an `aws-blocks/` directory 
 }
 ```
 
-4. Bootstrap the AWS CDK (one-time per account/region):
-
-```bash
-npx cdk bootstrap aws://ACCOUNT_ID/REGION
-```
-
-5. Deploy:
-
-```bash
-npm run deploy
-```
-
 This deploys your TanStack Start app to CloudFront (CDN) + S3 (static assets) + Lambda (SSR and API routes).
 
 #### Local development
