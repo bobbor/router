@@ -494,7 +494,7 @@ After successful deployment, click the **Visit site** button to see your deploye
 npm create @aws-blocks/blocks-app@latest .
 ```
 
-The CLI detects your TanStack Start project, adds an `aws-blocks/` directory with backend configuration, and updates your `package.json` with workspace setup, dependencies, and deploy scripts.
+The CLI detects your TanStack Start project, adds an `aws-blocks/` directory with backend configuration, and updates your `package.json` with workspace setup, dependencies, and deploy scripts (`dev:server`, `sandbox`, `deploy`, `destroy`). Your existing `dev`, `build`, and `start` scripts remain unchanged.
 
 #### Local development
 
