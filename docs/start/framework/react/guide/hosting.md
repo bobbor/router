@@ -484,101 +484,68 @@ After successful deployment, click the **Visit site** button to see your deploye
 
 ### AWS Blocks
 
-[AWS Blocks](https://docs.aws.amazon.com/blocks/latest/devguide/what-is-blocks.html) deploys your TanStack Start application to AWS (CloudFront, S3, Lambda) and gives you composable backend capabilities — databases, authentication, background jobs, AI, and more — all type-safe and running locally during development without an AWS account.
+[AWS Blocks](https://docs.aws.amazon.com/blocks/latest/devguide/what-is-blocks.html) deploys your TanStack Start application to AWS using CloudFront, S3, and Lambda. It uses [Nitro](#nitro) under the hood and adds composable backend capabilities (databases, auth, storage, background jobs, AI) that run locally during development and deploy to AWS alongside your app.
 
-#### Adding AWS Blocks to your TanStack Start app
+1. Follow the [`Nitro`](#nitro) deployment instructions to set up your `vite.config.ts`.
 
-Run the following command inside your existing TanStack Start project:
+2. Add AWS Blocks to your existing project:
 
 ```bash
 npm create @aws-blocks/blocks-app@latest .
 npm install
 ```
 
-This adds an `aws-blocks/` directory to your project. Your TanStack Start app continues to work as before — AWS Blocks layers in backend capabilities alongside it.
+The CLI detects your TanStack Start project and adds an `aws-blocks/` directory with deployment configuration and a `package.json` workspace.
 
-#### Using Blocks in your routes
+3. Add the deploy scripts to your `package.json`:
 
-Once installed, you can import and use Blocks directly in your TanStack Start server functions and API routes:
-
-```ts
-// aws-blocks/index.ts
-import { Scope, Hosting, KVStore, AuthBasic, ApiNamespace } from '@aws-blocks/blocks'
-
-const scope = new Scope('my-app')
-const auth = new AuthBasic(scope, 'auth')
-const todos = new KVStore(scope, 'todos')
-
-export const api = new ApiNamespace(scope, 'api', {
-  async listTodos(context) {
-    const user = await auth.getCurrentUser(context)
-    return todos.list({ prefix: user.userId })
-  },
-  async createTodo(context, title: string) {
-    const user = await auth.getCurrentUser(context)
-    await todos.set(`${user.userId}/${crypto.randomUUID()}`, { title, done: false })
-  },
-})
-
-new Hosting(scope)
+```json
+{
+  "scripts": {
+    "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "tsx watch aws-blocks/scripts/server.ts",
+    "dev:client": "vite dev",
+    "build": "vite build",
+    "deploy": "tsx aws-blocks/scripts/deploy.ts",
+    "destroy": "tsx aws-blocks/scripts/destroy.ts",
+    "sandbox": "tsx aws-blocks/scripts/sandbox.ts",
+    "sandbox:destroy": "tsx aws-blocks/scripts/sandbox-destroy.ts"
+  }
+}
 ```
 
-Then call it from your TanStack Start route loaders with full type safety:
-
-```ts
-// src/routes/index.tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { api } from '../aws-blocks'
-
-export const Route = createFileRoute('/')({
-  loader: () => api.listTodos(),
-  component: TodoList,
-})
-```
-
-Types flow end-to-end — no code generation, no schema stitching.
-
-#### Local development
+4. Bootstrap the AWS CDK (one-time per account/region):
 
 ```bash
-npm run dev
+npx cdk bootstrap aws://ACCOUNT_ID/REGION
 ```
 
-Your TanStack Start app runs at `http://localhost:3000` as usual. All Blocks use local implementations (in-memory storage, local JWT auth) so you can develop your full stack without AWS credentials or an internet connection.
-
-#### Deploy to AWS
-
-When you're ready to deploy:
+5. Deploy:
 
 ```bash
 npm run deploy
 ```
 
-This deploys your TanStack Start frontend via CloudFront + S3 + Lambda (SSR), and provisions all backend resources (DynamoDB tables, Cognito user pools, etc.) in one command.
+This deploys your TanStack Start app to CloudFront (CDN) + S3 (static assets) + Lambda (SSR and API routes), along with any backend Blocks you've defined.
 
-For rapid iteration against real AWS services without full CloudFormation deployments, use the sandbox:
+#### Sandbox deployments
+
+For rapid iteration against real AWS services without full CloudFormation deployments:
 
 ```bash
 npm run sandbox
 ```
 
-#### Prerequisites
+The sandbox uses Lambda hot-swapping for near-instant deploys, giving each developer an isolated environment.
 
-- Node.js 22+
-- For deployment: AWS CLI with credentials configured and CDK bootstrapped (`npx cdk bootstrap aws://ACCOUNT_ID/REGION`)
+#### Local development
 
-#### What AWS Blocks provides
+During local development, all Blocks run with in-memory implementations — no AWS account or credentials needed:
 
-| Capability | Block | AWS service (on deploy) |
-| --- | --- | --- |
-| Key-value storage | `KVStore` | DynamoDB |
-| Relational data | `Database` | Aurora PostgreSQL |
-| File uploads | `FileBucket` | S3 |
-| Authentication | `AuthBasic` / `AuthCognito` | Cognito |
-| Background jobs | `AsyncJob` | SQS + Lambda |
-| Scheduled tasks | `CronJob` | EventBridge + Lambda |
-| WebSocket realtime | `Realtime` | API Gateway WebSocket |
-| AI agents | `Agent` | Bedrock |
-| Hosting & SSR | `Hosting` | CloudFront + S3 + Lambda |
+```bash
+npm run dev
+```
 
-For the full list and API reference, see the [AWS Blocks Developer Guide](https://docs.aws.amazon.com/blocks/latest/devguide/what-is-blocks.html).
+Your TanStack Start app runs at `http://localhost:3000` as usual, with all backend Blocks available locally.
+
+For more details, see the [AWS Blocks Developer Guide](https://docs.aws.amazon.com/blocks/latest/devguide/what-is-blocks.html).
