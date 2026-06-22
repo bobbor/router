@@ -526,7 +526,17 @@ npx cdk bootstrap aws://ACCOUNT_ID/REGION
 npm run deploy
 ```
 
-This deploys your TanStack Start app to CloudFront (CDN) + S3 (static assets) + Lambda (SSR and API routes), along with any backend Blocks you've defined.
+This deploys your TanStack Start app to CloudFront (CDN) + S3 (static assets) + Lambda (SSR and API routes).
+
+#### Local development
+
+During local development, all Blocks run with in-memory implementations — no AWS account or credentials needed:
+
+```bash
+npm run dev
+```
+
+Your TanStack Start app runs at `http://localhost:3000` as usual.
 
 #### Sandbox deployments
 
@@ -538,14 +548,16 @@ npm run sandbox
 
 The sandbox uses Lambda hot-swapping for near-instant deploys, giving each developer an isolated environment.
 
-#### Local development
-
-During local development, all Blocks run with in-memory implementations — no AWS account or credentials needed:
+#### Production deployment
 
 ```bash
-npm run dev
+npm run deploy
 ```
 
-Your TanStack Start app runs at `http://localhost:3000` as usual, with all backend Blocks available locally.
+This runs a full CDK deployment. To remove all resources:
+
+```bash
+npm run destroy
+```
 
 For more details, see the [AWS Blocks Developer Guide](https://docs.aws.amazon.com/blocks/latest/devguide/what-is-blocks.html).
