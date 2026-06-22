@@ -23,6 +23,7 @@ Once you've chosen a deployment target, you can follow the deployment guidelines
 - [`node-server`](#nodejs--docker): Deploy to a Node.js server
 - [`bun`](#bun): Deploy to a Bun server
 - [`appwrite-sites`](#appwrite-sites): Deploy to Appwrite Sites
+- [`aws-blocks`](#aws-blocks): Deploy to AWS with AWS Blocks
 - ... and more to come!
 
 ### Cloudflare Workers ⭐ _Official Partner_
@@ -480,3 +481,87 @@ In your Appwrite project, navigate to the **Sites** page from the sidebar. Click
 5. Click **Deploy**
 
 After successful deployment, click the **Visit site** button to see your deployed application.
+
+### AWS Blocks
+
+[AWS Blocks](https://docs.aws.amazon.com/blocks/latest/devguide/what-is-blocks.html) is a composable backend toolkit for building full-stack applications on AWS. It includes a `Hosting` block that deploys your TanStack Start application to AWS using CloudFront, S3, and Lambda — following AWS best practices with zero configuration.
+
+AWS Blocks provides:
+
+- **Full-stack deployment** — frontend hosting + backend Blocks (databases, auth, jobs, AI) in one `npm run deploy`
+- **Local development** — run your entire app locally without an AWS account
+- **End-to-end type safety** — TypeScript types flow from backend to frontend with no code generation
+
+#### Quick start
+
+1. Create a new TanStack Start app with AWS Blocks:
+
+```bash
+npm create @aws-blocks/blocks-app@latest my-app --template react
+cd my-app
+npm install
+```
+
+2. Define your backend in `aws-blocks/index.ts`:
+
+```ts
+import { Scope, Hosting, KVStore, ApiNamespace } from '@aws-blocks/blocks'
+
+const scope = new Scope('my-app')
+
+const todos = new KVStore(scope, 'todos')
+
+const api = new ApiNamespace(scope, 'api', {
+  async getTodos() {
+    return todos.list()
+  },
+  async addTodo(title: string) {
+    await todos.set(crypto.randomUUID(), { title, completed: false })
+  },
+})
+
+new Hosting(scope)
+```
+
+3. Run locally:
+
+```bash
+npm run dev
+```
+
+Your app runs at `http://localhost:3000` with all Blocks using local implementations — no AWS account needed.
+
+4. Deploy to AWS:
+
+```bash
+npm run deploy
+```
+
+This runs a full CDK deployment creating a CloudFront distribution, S3 bucket for static assets, and Lambda functions for server-side rendering and API routes.
+
+#### Adding AWS Blocks to an existing TanStack Start project
+
+You can add AWS Blocks to an existing TanStack Start project:
+
+```bash
+npm create @aws-blocks/blocks-app@latest .
+```
+
+The CLI detects your existing project and adds an `aws-blocks/` directory with the hosting configuration.
+
+#### Prerequisites for deployment
+
+- AWS CLI configured with credentials ([setup guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
+- CDK bootstrapped in your account: `npx cdk bootstrap aws://ACCOUNT_ID/REGION`
+
+#### Sandbox deployments
+
+For rapid iteration against real AWS services without full CloudFormation deployments:
+
+```bash
+npm run sandbox
+```
+
+The sandbox uses Lambda hot-swapping for fast deploys, giving each developer an isolated environment.
+
+For more details, see the [AWS Blocks Developer Guide](https://docs.aws.amazon.com/blocks/latest/devguide/what-is-blocks.html).
